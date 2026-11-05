@@ -1,0 +1,596 @@
+// Nootbook — Prisma schema (Step 1: Foundation)
+//
+// Conventions:
+// - All tenant (college-scoped) tables carry `collegeId`.
+// - All money is stored as integer paise (`*Paise`) to avoid floating-point errors.
+//   Rs. 1 = 100 paise. Commission is stored in basis points (`commissionBps`; 1000 = 10%).
+// - `ledger_entries` are immutable: the app never updates or deletes them.
+//   Corrections are written as new reverse entries (double-entry, always balancing).
+// - Row-level security (RLS) is applied to tenant tables via SQL policies (see
+//   supabase/migrations), not in this schema file.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===== Enums =====
+
+enum RoleName {
+  STUDENT
+  EARNER
+  CLASS_ADMIN
+  DEPARTMENT_ADMIN
+  COLLEGE_ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum ResourceType {
+  OLD_PAPER
+  ASSIGNMENT
+  PRACTICAL_FILE
+  NOTES
+  SLIDES
+  LAB_MANUAL
+  SYLLABUS
+}
+
+enum ResourceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TaskType {
+  FORMATTING
+  TYPING
+  SLIDE_DESIGN
+  DIAGRAM
+  PROOFREADING
+  TUTORING
+  DOUBT_SOLVING
+  PROJECT_GUIDANCE
+}
+
+enum TaskStatus {
+  OPEN
+  ASSIGNED
+  DELIVERED
+  ACCEPTED
+  DISPUTED
+  REFUNDED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum EscrowStatus {
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+enum LedgerAccount {
+  USER_BALANCE
+  ESCROW_HELD
+  PLATFORM_REVENUE
+  REFUNDS_PAYABLE
+  PAYOUTS_PENDING
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+}
+
+enum PayoutStatus {
+  REQUESTED
+  PROCESSING
+  PAID
+  FAILED
+  REJECTED
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_RELEASE
+  RESOLVED_REFUND
+  CLOSED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  WHATSAPP
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+// ===== Models =====
+
+model College {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  city        String   @default("Nagpur")
+  emailDomain String? // used to recognise college email addresses at signup
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  departments       Department[]
+  classes           Class[]
+  subjects          Subject[]
+  users             User[]
+  roles             Role[]
+  resources         Resource[]
+  tasks             Task[]
+  wallets           Wallet[]
+  ledgerEntries     LedgerEntry[]
+  escrowHolds       EscrowHold[]
+  payouts           Payout[]
+  disputes          Dispute[]
+  reviews           Review[]
+  notifications     Notification[]
+  reports           Report[]
+  auditLogs         AuditLog[]
+  commissionConfigs CommissionConfig[]
+  bookmarks         Bookmark[]
+
+  @@map("colleges")
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  name      String
+  code      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes   Class[]
+  subjects  Subject[]
+  users     User[]
+  roles     Role[]
+  resources Resource[]
+
+  @@unique([collegeId, code])
+  @@map("departments")
+}
+
+// A "class" is one batch/division inside a department, year and semester.
+// Library tree: College -> Department -> Class (year + semester + division) -> Subject.
+model Class {
+  id           String     @id @default(cuid())
+  collegeId    String
+  college      College    @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  year         Int // 1, 2, 3, 4
+  semester     Int // 1..8
+  division     String     @default("A")
+  name         String // display name, e.g. "First Year · Sem 1 · A"
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  subjects  Subject[]
+  users     User[]
+  roles     Role[]
+  resources Resource[]
+
+  @@unique([departmentId, year, semester, division])
+  @@map("classes")
+}
+
+model Subject {
+  id           String     @id @default(cuid())
+  collegeId    String
+  college      College    @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  classId      String
+  class        Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  name         String
+  code         String?
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  resources Resource[]
+  tasks     Task[]
+
+  @@unique([departmentId, classId, name])
+  @@map("subjects")
+}
+
+model User {
+  // Set to the Supabase Auth user id (auth.uid()) at signup so that Postgres
+  // row-level security can bind rows to the signed-in user.
+  id            String      @id
+  email         String?     @unique
+  phone         String?     @unique
+  name          String
+  passwordHash  String? // null when the account uses OTP/social login only
+  emailVerified DateTime?
+  phoneVerified DateTime?
+  collegeId     String?
+  college       College?    @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  departmentId  String?
+  department    Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  classId       String?
+  class         Class?      @relation(fields: [classId], references: [id], onDelete: SetNull)
+  status        UserStatus  @default(PENDING)
+  avatarUrl     String?
+  kycVerified   Boolean     @default(false) // earners must be KYC-verified before first payout
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  roles             Role[]
+  uploadedResources Resource[]         @relation("ResourceUploader")
+  approvedResources Resource[]         @relation("ResourceApprover")
+  postedTasks       Task[]             @relation("TaskStudent")
+  acceptedTasks     Task[]             @relation("TaskEarner")
+  bids              Bid[]
+  wallet            Wallet?
+  ledgerEntries     LedgerEntry[]
+  payouts           Payout[]
+  disputesOpened    Dispute[]          @relation("DisputeOpener")
+  disputesDecided   Dispute[]          @relation("DisputeDecider")
+  reviewsGiven      Review[]           @relation("ReviewReviewer")
+  reviewsReceived   Review[]           @relation("ReviewEarner")
+  notifications     Notification[]
+  reportsMade       Report[]           @relation("ReportReporter")
+  reportsHandled    Report[]           @relation("ReportResolver")
+  reportedIn        Report[]           @relation("ReportReportedUser")
+  auditLogs         AuditLog[]
+  commissionChanges CommissionConfig[] @relation("CommissionUpdater")
+  bookmarks         Bookmark[]
+  escrowHolds       EscrowHold[]
+
+  @@map("users")
+}
+
+// Role-based access control with scope. A user may hold several roles; each row
+// scopes the role to a college (and, for admins, a department or class).
+// SUPER_ADMIN rows have no collegeId (platform-wide).
+model Role {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         RoleName
+  collegeId    String?
+  college      College?    @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  classId      String?
+  class        Class?      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+
+  @@index([userId])
+  @@index([collegeId, name])
+  @@map("roles")
+}
+
+model Resource {
+  id              String         @id @default(cuid())
+  collegeId       String
+  college         College        @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  departmentId    String
+  department      Department     @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  classId         String
+  class           Class          @relation(fields: [classId], references: [id], onDelete: Restrict)
+  subjectId       String
+  subject         Subject        @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  type            ResourceType
+  title           String
+  description     String?
+  fileKey         String // object-storage key (Supabase Storage)
+  fileName        String
+  mimeType        String
+  fileSize        Int
+  status          ResourceStatus @default(PENDING)
+  academicYear    String? // e.g. "2024-25"
+  examType        String? // e.g. "mid-term", "end-sem"
+  verifiedBadge   Boolean        @default(false)
+  downloadCount   Int            @default(0)
+  rejectionReason String?
+  uploaderId      String
+  uploader        User           @relation("ResourceUploader", fields: [uploaderId], references: [id], onDelete: Restrict)
+  approvedById    String?
+  approvedBy      User?          @relation("ResourceApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  tags      ResourceTag[]
+  bookmarks Bookmark[]
+  reports   Report[]
+
+  @@index([collegeId, subjectId, status])
+  @@index([collegeId, status])
+  @@map("resources")
+}
+
+model ResourceTag {
+  id         String   @id @default(cuid())
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  name       String
+
+  @@index([resourceId])
+  @@map("resource_tags")
+}
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  collegeId  String
+  college    College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, resourceId])
+  @@map("bookmarks")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  collegeId   String
+  college     College    @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     User       @relation("TaskStudent", fields: [studentId], references: [id], onDelete: Restrict)
+  earnerId    String?
+  earner      User?      @relation("TaskEarner", fields: [earnerId], references: [id], onDelete: SetNull)
+  subjectId   String?
+  subject     Subject?   @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  type        TaskType
+  title       String
+  description String
+  deadline    DateTime
+  budgetPaise Int
+  status      TaskStatus @default(OPEN)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  bids          Bid[]
+  escrowHold    EscrowHold?
+  ledgerEntries LedgerEntry[]
+  dispute       Dispute?
+  reviews       Review[]
+  reports       Report[]
+
+  @@index([collegeId, status])
+  @@index([studentId])
+  @@index([earnerId])
+  @@map("tasks")
+}
+
+model Bid {
+  id          String    @id @default(cuid())
+  taskId      String
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  earnerId    String
+  earner      User      @relation(fields: [earnerId], references: [id], onDelete: Cascade)
+  amountPaise Int
+  message     String?
+  status      BidStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([taskId])
+  @@map("bids")
+}
+
+model EscrowHold {
+  id           String       @id @default(cuid())
+  collegeId    String
+  college      College      @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  taskId       String       @unique
+  task         Task         @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  paymentId    String // partner payment/order id
+  amountPaise  Int
+  status       EscrowStatus @default(HELD)
+  createdAt    DateTime     @default(now())
+  releasedAt   DateTime?
+  releasedById String?
+  releasedBy   User?        @relation(fields: [releasedById], references: [id], onDelete: SetNull)
+
+  @@map("escrow_holds")
+}
+
+// Immutable double-entry ledger. Each movement writes >=2 rows whose debits and
+// credits sum to zero. Never updated or deleted by the app.
+model LedgerEntry {
+  id          String        @id @default(cuid())
+  collegeId   String
+  college     College       @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  account     LedgerAccount
+  debitPaise  Int           @default(0)
+  creditPaise Int           @default(0)
+  userId      String?
+  user        User?         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  taskId      String?
+  task        Task?         @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  reference   String // groups the legs of one balanced movement
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  @@index([collegeId, reference])
+  @@index([userId])
+  @@map("ledger_entries")
+}
+
+model Wallet {
+  id                  String       @id @default(cuid())
+  userId              String       @unique
+  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId           String
+  college             College      @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  availablePaise      Int          @default(0)
+  pendingPaise        Int          @default(0)
+  totalEarnedPaise    Int          @default(0)
+  totalWithdrawnPaise Int          @default(0)
+  status              WalletStatus @default(ACTIVE)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@map("wallets")
+}
+
+model Payout {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  collegeId       String
+  college         College      @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  amountPaise     Int
+  status          PayoutStatus @default(REQUESTED)
+  partnerPayoutId String?
+  failureReason   String?
+  createdAt       DateTime     @default(now())
+  processedAt     DateTime?
+
+  @@index([userId])
+  @@map("payouts")
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  taskId      String        @unique
+  task        Task          @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  collegeId   String
+  college     College       @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  openedById  String
+  openedBy    User          @relation("DisputeOpener", fields: [openedById], references: [id], onDelete: Restrict)
+  reason      String
+  evidence    String? // free text / URLs
+  status      DisputeStatus @default(OPEN)
+  decision    String?
+  decidedById String?
+  decidedBy   User?         @relation("DisputeDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("disputes")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  collegeId  String
+  college    College  @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  reviewerId String
+  reviewer   User     @relation("ReviewReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  earnerId   String
+  earner     User     @relation("ReviewEarner", fields: [earnerId], references: [id], onDelete: Restrict)
+  rating     Int // 1..5, validated in the app layer
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@unique([taskId, reviewerId])
+  @@map("reviews")
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId String?
+  college   College?            @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  type      String // e.g. "NEW_PAPER", "TASK_UPDATE", "PAYMENT"
+  title     String
+  body      String
+  channel   NotificationChannel @default(IN_APP)
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+model Report {
+  id             String       @id @default(cuid())
+  collegeId      String
+  college        College      @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  reportedById   String
+  reportedBy     User         @relation("ReportReporter", fields: [reportedById], references: [id], onDelete: Restrict)
+  resourceId     String?
+  resource       Resource?    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  taskId         String?
+  task           Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  reportedUserId String?
+  reportedUser   User?        @relation("ReportReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reason         String
+  status         ReportStatus @default(OPEN)
+  resolvedById   String?
+  resolvedBy     User?        @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  note           String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([collegeId, status])
+  @@map("reports")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  collegeId String?
+  college   College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  actorId   String
+  actor     User     @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action    String // e.g. "RESOURCE_APPROVE", "ROLE_CHANGE", "COMMISSION_UPDATE"
+  entity    String // e.g. "Resource", "User", "Task"
+  entityId  String
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([collegeId, actorId])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
+
+// Commission and fixed fee, configurable by the Super Admin (never hard-coded).
+// A row with collegeId = null is the platform default; college-specific rows override it.
+model CommissionConfig {
+  id            String   @id @default(cuid())
+  collegeId     String?
+  college       College? @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  commissionBps Int      @default(1000) // 1000 bps = 10% taken from the earner
+  fixedFeePaise Int      @default(2000) // Rs. 20 charged to the payer
+  updatedById   String?
+  updatedBy     User?    @relation("CommissionUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([collegeId])
+  @@map("commission_configs")
+}

@@ -1,0 +1,9 @@
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
+  # Required by our tooling:
+  esbuild: true
+  "@prisma/engines": true
+  prisma: true
+  # Not used by this project (Cloudflare Workers runtime):
+  workerd: false
