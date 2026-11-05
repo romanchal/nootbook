@@ -49,13 +49,13 @@ without a second lookup column.
 bypasses RLS. So RLS alone does not protect the Prisma path. We keep RLS for
 any direct Supabase `authenticated`-role access and document this honestly.
 
-## 2026-11-06 — Auth provider (for Step 2): Supabase Auth
+## 2026-11-06 — Auth provider: Supabase Auth (confirmed)
 
-**Decision.** Plan to use Supabase Auth for OTP/email/Google login and 2FA.
+**Decision.** Use Supabase Auth for OTP/email/Google login and 2FA.
 
 **Why.** It is in the document's allowed list, is included in the Supabase free
-tier, and its JWTs integrate with Postgres RLS. This is an assumption recorded
-here; it will be confirmed when we start Step 2.
+tier, and its JWTs integrate with Postgres RLS. Confirmed by the team when the
+Supabase project (`jcbwmatnivnfbgphtjva`) was provided.
 
 ## Open items (to confirm with the team / professionals)
 
