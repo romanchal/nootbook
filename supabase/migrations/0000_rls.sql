@@ -31,7 +31,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select "collegeId" from "users" where "id" = auth.uid();
+  select "collegeId" from "users" where "id" = auth.uid()::text;
 $$;
 
 -- Colleges: a user may read their own college row.
@@ -117,20 +117,20 @@ create policy "bids_via_task" on "bids"
 alter table "users" enable row level security;
 create policy "users_self_or_college" on "users"
   for select using (
-    "id" = auth.uid()
+    "id" = auth.uid()::text
     or "collegeId" = public.nootbook_current_user_college_id()
   );
 
 alter table "roles" enable row level security;
 create policy "roles_self_or_college" on "roles"
   for select using (
-    "userId" = auth.uid()
+    "userId" = auth.uid()::text
     or "collegeId" = public.nootbook_current_user_college_id()
   );
 
 alter table "notifications" enable row level security;
 create policy "notifications_own" on "notifications"
-  for select using ("userId" = auth.uid());
+  for select using ("userId" = auth.uid()::text);
 
 alter table "audit_logs" enable row level security;
 create policy "audit_logs_college" on "audit_logs"

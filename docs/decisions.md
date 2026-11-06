@@ -57,6 +57,35 @@ any direct Supabase `authenticated`-role access and document this honestly.
 tier, and its JWTs integrate with Postgres RLS. Confirmed by the team when the
 Supabase project (`jcbwmatnivnfbgphtjva`) was provided.
 
+## 2026-11-06 — Database region: ap-northeast-2 (Seoul)
+
+**Decision.** The Supabase project lives in `ap-northeast-2` (Seoul); the pooler
+host is `aws-0-ap-northeast-2.pooler.supabase.com`.
+
+**Why.** Discovered by scanning the poolers (the tenant resolves only in Seoul).
+Recorded so the connection string and migration helper target the right host.
+
+## 2026-11-06 — SSL mode and the schema-engine IPv6 workaround
+
+**Decision.** Append `?sslmode=no-verify` to the connection string, and run
+`prisma migrate` through `scripts/db-migrate.mjs`, which resolves the pooler to
+an IPv4 address first.
+
+**Why.** The pooler requires TLS but its certificate is not in the default trust
+store on this machine, so `no-verify` is required. Separately, the Prisma
+*schema engine* (Rust) cannot connect to the pooler's IPv6/NAT64 DNS entries
+(error `P1001`), while the Node `pg` driver can. The helper resolves IPv4 for
+migrations only; the app runtime (pg adapter) connects via the hostname.
+
+## 2026-11-06 — users.id stored as text (auth.uid() UUID string)
+
+**Decision.** `users.id` is a `text` column holding the Supabase Auth user id
+(UUID string), not a native `uuid` type.
+
+**Why.** Prisma `String @id` maps to `text`, so the RLS policies compare
+`"id" = auth.uid()::text`. Functionally identical for the app; a native `uuid`
+column can be adopted later for index/type benefits.
+
 ## Open items (to confirm with the team / professionals)
 
 - Final commission and fixed-fee numbers (the document's Rs. 500 / 10% / Rs. 20

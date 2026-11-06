@@ -42,11 +42,18 @@ Open http://localhost:3000.
 ### Getting a Supabase database (free)
 
 1. Create a project at https://supabase.com (free tier).
-2. In **Project Settings → Database**, copy the **connection string**.
-3. Use the **Session pooler** URL (port `5432`) for `DATABASE_URL` so Prisma
-   can run migrations.
-4. To apply the RLS script: open **SQL Editor** in Supabase and run the file
-   `supabase/migrations/0000_rls.sql`.
+2. In **Project Settings → Database**, copy the **connection string** (Session pooler, port `5432`).
+3. In `.env`, set `DATABASE_URL` to that string, then append `?sslmode=no-verify`
+   and percent-encode any `@` in the password as `%40`.
+4. Run `pnpm db:deploy` to create the tables, then `pnpm db:seed` to seed the pilot college.
+
+> **Note on migrations:** the Prisma *schema engine* cannot reach Supabase's
+> pooler over IPv6 (error `P1001`), so `pnpm db:migrate` / `pnpm db:deploy` run
+> through [`scripts/db-migrate.mjs`](scripts/db-migrate.mjs), which resolves the
+> pooler to IPv4 first. The app runtime uses the normal hostname and works fine.
+
+RLS policies live in [`supabase/migrations/`](supabase/migrations/) and are
+applied to the database (they were applied via `prisma db execute`).
 
 ## Scripts
 

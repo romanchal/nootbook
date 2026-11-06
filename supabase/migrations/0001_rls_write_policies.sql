@@ -15,12 +15,12 @@
 
 -- A user may create their own record (id matches the auth user)...
 create policy "users_insert_self" on "users"
-  for insert with check ("id" = auth.uid());
+  for insert with check ("id" = auth.uid()::text);
 
 -- ...and update only their own row.
 create policy "users_update_self" on "users"
-  for update using ("id" = auth.uid())
-  with check ("id" = auth.uid());
+  for update using ("id" = auth.uid()::text)
+  with check ("id" = auth.uid()::text);
 
 -- Roles are written by the server (postgres role) and by admins; no direct
 -- authenticated-role write policy is granted yet. Same for wallets, which are
