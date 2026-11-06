@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { studentRole } from "@/features/auth/roles";
+import { getAuthUser } from "@/features/auth/current-user";
 
 export interface EnsureUserInput {
   /** The Supabase Auth user id (auth.uid()). */
@@ -61,5 +62,33 @@ export async function ensureUserRecord(input: EnsureUserInput) {
     });
 
     return user;
+  });
+}
+
+/**
+ * Called right after a successful sign-in. If the user has no application
+ * record yet, create one with the default STUDENT role + wallet, scoped to the
+ * first active college (the seeded pilot college). Safe to call every sign-in.
+ */
+export async function provisionOnFirstSignIn() {
+  const authUser = await getAuthUser();
+  if (!authUser) return null;
+
+  const existing = await db.user.findUnique({ where: { id: authUser.id } });
+  if (existing) return existing;
+
+  const college = await db.college.findFirst({
+    where: { active: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!college) return null;
+
+  const metadata = authUser.user_metadata as { name?: string } | undefined;
+
+  return ensureUserRecord({
+    authUserId: authUser.id,
+    email: authUser.email ?? "",
+    name: metadata?.name ?? null,
+    collegeId: college.id,
   });
 }

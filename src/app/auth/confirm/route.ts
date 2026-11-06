@@ -1,6 +1,7 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { provisionOnFirstSignIn } from "@/features/auth/ensure-user";
 
 /**
  * Handles the Supabase email magic-link / OTP redirect.
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     if (!error) {
+      await provisionOnFirstSignIn();
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

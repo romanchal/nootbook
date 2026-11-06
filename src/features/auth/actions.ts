@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { emailSchema, otpSchema } from "@/features/auth/schemas";
+import { provisionOnFirstSignIn } from "@/features/auth/ensure-user";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthResult = { error?: string };
@@ -42,7 +43,8 @@ export async function verifyOtp(input: { email: string; code: string }): Promise
     return { error: error.message };
   }
 
-  redirect("/");
+  await provisionOnFirstSignIn();
+  redirect("/dashboard");
 }
 
 export async function signOut(): Promise<void> {
