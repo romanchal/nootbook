@@ -5,16 +5,30 @@ import { provisionOnFirstSignIn } from "@/features/auth/ensure-user";
 
 /**
  * Handles the Supabase email magic-link / OTP redirect.
- * Supabase appends ?token_hash=...&type=... to this URL; we verify and send the
- * user to the dashboard (or back to login on failure).
+ *
+ * Two flows arrive here:
+ * - PKCE (default): the link carries `?code=...` to exchange for a session.
+ * - Implicit: the link carries `?token_hash=...&type=...` to verify directly.
+ *
+ * On success we provision the app record and send the user to the dashboard.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
 
+  const supabase = await createClient();
+
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      await provisionOnFirstSignIn();
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
   if (tokenHash && type) {
-    const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     if (!error) {
       await provisionOnFirstSignIn();

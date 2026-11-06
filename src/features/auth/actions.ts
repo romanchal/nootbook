@@ -19,7 +19,11 @@ export async function requestOtp(input: { email: string }): Promise<AuthResult> 
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({ email: parsed.data.email });
+  const origin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const { error } = await supabase.auth.signInWithOtp({
+    email: parsed.data.email,
+    options: { emailRedirectTo: `${origin}/auth/confirm` },
+  });
   if (error) {
     return { error: error.message };
   }
