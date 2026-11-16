@@ -355,19 +355,21 @@ export default async function DashboardPage() {
               {canCollegeAdmin && (
                 <Link
                   href="/admin/college"
-                  className="group rounded-2xl border border-indigo-500/20 bg-card p-5 transition-all hover:border-indigo-500/40 hover:shadow-sm hover:-translate-y-0.5"
+                  className="group rounded-2xl border border-blue-500/30 bg-gradient-to-br from-card via-card to-blue-500/5 p-5 transition-all hover:border-blue-600 hover:shadow-md hover:-translate-y-0.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="rounded-md bg-indigo-500/10 px-2 py-0.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                      College Admin
+                    <span className="rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                      🏛️ College Admin Console
                     </span>
-                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
-                      Manage →
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 group-hover:translate-x-0.5 transition-transform">
+                      Manage PBCOE →
                     </span>
                   </div>
-                  <h3 className="mt-2 text-base font-bold text-foreground">College Management</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Manage departments, curriculum subjects, dispute mediation, and class reps.
+                  <h3 className="mt-2.5 text-base font-bold text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    PBCOE Campus Administration
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Manage 8 engineering branches, moderate uploaded exam papers, assign Class Admins, and mediate student task dispute escrows.
                   </p>
                 </Link>
               )}
@@ -375,19 +377,21 @@ export default async function DashboardPage() {
               {canSuperAdmin && (
                 <Link
                   href="/admin/super"
-                  className="group rounded-2xl border border-purple-500/20 bg-card p-5 transition-all hover:border-purple-500/40 hover:shadow-sm hover:-translate-y-0.5"
+                  className="group rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-card via-card to-indigo-500/5 p-5 transition-all hover:border-indigo-600 hover:shadow-md hover:-translate-y-0.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-bold text-purple-600 dark:text-purple-400">
-                      Platform Super Admin
+                    <span className="rounded-lg bg-indigo-50 dark:bg-indigo-950 px-2.5 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                      👑 Platform Super Admin
                     </span>
-                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform">
-                      Platform →
+                    <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 group-hover:translate-x-0.5 transition-transform">
+                      Global Console →
                     </span>
                   </div>
-                  <h3 className="mt-2 text-base font-bold text-foreground">Global Platform Console</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Cross-college administration, platform revenue ledger, global fee configs, and audit logs.
+                  <h3 className="mt-2.5 text-base font-bold text-foreground group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+                    Global Multi-College Super Console
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Cross-college directory, platform commission & revenue ledger, global fee settings, and platform-wide security audit logs.
                   </p>
                 </Link>
               )}

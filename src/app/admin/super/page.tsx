@@ -38,12 +38,22 @@ export default async function SuperAdminPage() {
 
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 sm:px-6 py-6 sm:py-8">
         {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Link href="/dashboard" className="hover:text-foreground transition-colors">
-            Dashboard
+        <nav aria-label="Breadcrumb" className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard" className="hover:text-blue-700 transition-colors">
+              Dashboard
+            </Link>
+            <span>/</span>
+            <span className="text-foreground font-semibold">Platform Super Admin</span>
+          </div>
+
+          <Link
+            href="/admin/college"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/60 px-3 py-1 font-bold text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors shadow-2xs"
+          >
+            <span>🏛️</span>
+            <span>Open PBCOE College Admin →</span>
           </Link>
-          <span>/</span>
-          <span className="text-foreground font-semibold">Platform Super Admin</span>
         </nav>
 
         {/* Header Hero Banner */}

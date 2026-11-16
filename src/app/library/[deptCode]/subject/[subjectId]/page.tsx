@@ -8,6 +8,7 @@ import { ResourceDownloadButton } from "@/features/library/download-button";
 import { BookmarkButton } from "@/features/library/bookmark-button";
 import { ReportResourceButton } from "@/features/library/report-button";
 import { buttonVariants } from "@/components/ui/button";
+import { AppNavbar } from "@/components/layout/app-navbar";
 import type { ResourceType } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -44,205 +45,240 @@ export default async function SubjectPage({ params, searchParams }: SubjectPageP
 
   const filterTabs: Array<{ type: ResourceType | "ALL"; label: string }> = [
     { type: "ALL", label: "All Resources" },
-    { type: "OLD_PAPER", label: "Old Papers" },
-    { type: "NOTES", label: "Notes" },
+    { type: "OLD_PAPER", label: "Exam Papers" },
+    { type: "NOTES", label: "Lecture Notes" },
     { type: "LAB_MANUAL", label: "Lab Manuals" },
     { type: "PRACTICAL_FILE", label: "Practicals" },
     { type: "ASSIGNMENT", label: "Assignments" },
   ];
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
-      {/* Breadcrumb Navigation (The 3 Taps in reverse) */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-        <Link href="/dashboard" className="hover:text-foreground">
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link href="/library" className="hover:text-foreground">
-          Library
-        </Link>
-        <span>/</span>
-        <Link href={`/library/${department.code.toLowerCase()}`} className="hover:text-foreground">
-          {department.code}
-        </Link>
-        <span>/</span>
-        <Link
-          href={`/library/${department.code.toLowerCase()}/sem/${classRecord.semester}`}
-          className="hover:text-foreground"
-        >
-          Sem {classRecord.semester}
-        </Link>
-        <span>/</span>
-        <span className="font-medium text-foreground">{subject.name}</span>
-      </nav>
+    <div className="min-h-screen flex flex-col bg-background ambient-mesh pb-20 md:pb-12">
+      <AppNavbar
+        user={{
+          id: user.id,
+          name: user.name || "Student",
+          email: user.email,
+          collegeName: user.college?.name,
+          collegeCity: user.college?.city,
+          roles: user.roles,
+        }}
+      />
 
-      {/* Subject Header */}
-      <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-xs sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            {subject.code && (
-              <span className="rounded bg-primary/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-primary">
-                {subject.code}
-              </span>
-            )}
-            <span className="text-xs text-muted-foreground">
-              Semester {classRecord.semester} · {department.name}
-            </span>
+      <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 sm:px-6 py-6 sm:py-8">
+        {/* Breadcrumb Navigation */}
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+          <Link href="/dashboard" className="hover:text-blue-700 transition-colors">
+            Dashboard
+          </Link>
+          <span>/</span>
+          <Link href="/library" className="hover:text-blue-700 transition-colors">
+            Library
+          </Link>
+          <span>/</span>
+          <Link href={`/library/${department.code.toLowerCase()}`} className="hover:text-blue-700 transition-colors">
+            {department.code}
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/library/${department.code.toLowerCase()}/sem/${classRecord.semester}`}
+            className="hover:text-blue-700 transition-colors"
+          >
+            Sem {classRecord.semester}
+          </Link>
+          <span>/</span>
+          <span className="font-semibold text-foreground">{subject.name}</span>
+        </nav>
+
+        {/* Subject Header Banner */}
+        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-card via-card to-blue-500/5 p-6 sm:p-8 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                {subject.code && (
+                  <span className="rounded-lg bg-blue-700 text-white px-2.5 py-0.5 font-mono text-xs font-bold shadow-2xs">
+                    {subject.code}
+                  </span>
+                )}
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                  Semester {classRecord.semester} · {department.name}
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                {subject.name}
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
+                Priyadarshini Bhagwati College of Engineering repository: Term I & Term II question papers, syllabus, and study notes.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 sm:pt-0">
+              <Link
+                href={`/library/upload?subjectId=${subject.id}&deptCode=${deptCode}`}
+                className={buttonVariants({
+                  size: "sm",
+                  className: "gap-1.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs shadow-xs",
+                })}
+              >
+                <span>+ Upload</span>
+              </Link>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">{subject.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            Verified academic repository: previous year university exam papers, topper lecture notes, and lab manuals.
-          </p>
         </div>
 
-        <Link
-          href={`/library/upload?subjectId=${subject.id}&deptCode=${deptCode}`}
-          className={buttonVariants({ variant: "outline", size: "sm", className: "shrink-0 gap-1" })}
-        >
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Upload Resource
-        </Link>
-      </div>
+        {/* Filter Tabs / Pills */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+          {filterTabs.map((tab) => {
+            const isActive = tab.type === "ALL" ? !selectedType : selectedType === tab.type;
+            const href =
+              tab.type === "ALL"
+                ? `/library/${deptCode.toLowerCase()}/subject/${subjectId}`
+                : `/library/${deptCode.toLowerCase()}/subject/${subjectId}?type=${tab.type}`;
 
-      {/* Filter Tabs / Pills */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-        {filterTabs.map((tab) => {
-          const isActive = tab.type === "ALL" ? !selectedType : selectedType === tab.type;
-          const href =
-            tab.type === "ALL"
-              ? `/library/${deptCode.toLowerCase()}/subject/${subjectId}`
-              : `/library/${deptCode.toLowerCase()}/subject/${subjectId}?type=${tab.type}`;
-
-          return (
-            <Link
-              key={tab.type}
-              href={href}
-              className={`inline-flex shrink-0 items-center rounded-full px-3 py-1.5 font-medium transition-colors ${
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Level 5: Resources Cards */}
-      <section className="space-y-4">
-        {resources.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-            <div className="rounded-full bg-muted p-3 text-muted-foreground">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-              </svg>
-            </div>
-            <h3 className="mt-3 text-sm font-semibold text-foreground">
-              No {selectedType ? RESOURCE_TYPE_META[selectedType]?.label : "resources"} found yet
-            </h3>
-            <p className="mt-1 text-xs text-muted-foreground max-w-sm">
-              Be the first to upload old exam papers or notes for this subject. Uploads are verified by your Class Admin.
-            </p>
-          </div>
-        ) : (
-          resources.map((res) => {
-            const meta = RESOURCE_TYPE_META[res.type];
             return (
-              <article
-                key={res.id}
-                className="flex flex-col gap-3 rounded-xl border bg-card p-5 shadow-xs transition-colors hover:border-primary/50"
+              <Link
+                key={tab.type}
+                href={href}
+                className={`inline-flex shrink-0 items-center rounded-xl px-3.5 py-1.5 font-semibold transition-all ${
+                  isActive
+                    ? "bg-blue-700 text-white shadow-xs"
+                    : "bg-card border border-border/70 text-muted-foreground hover:bg-slate-100 hover:text-foreground"
+                }`}
               >
-                {/* Meta Row */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span
-                      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${meta.badgeClass}`}
-                    >
-                      {meta.label}
-                    </span>
-
-                    {res.academicYear && (
-                      <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        {res.academicYear}
-                      </span>
-                    )}
-
-                    {res.examType && (
-                      <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        {res.examType}
-                      </span>
-                    )}
-
-                    {res.verifiedBadge && (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                        Verified
-                      </span>
-                    )}
-                  </div>
-
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {formatFileSize(res.fileSize)}
-                  </span>
-                </div>
-
-                {/* Title & Description */}
-                <div>
-                  <h3 className="text-base font-semibold tracking-tight text-foreground">
-                    {res.title}
-                  </h3>
-                  {res.description && (
-                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                      {res.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Tags if any */}
-                {res.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {res.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="rounded bg-muted/60 px-1.5 py-0.5 text-[11px] text-muted-foreground"
-                      >
-                        #{tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Action Row */}
-                <div className="mt-1 flex items-center justify-between border-t pt-3">
-                  <div className="text-xs text-muted-foreground">
-                    Uploaded by <span className="font-medium text-foreground">{res.uploader.name}</span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <BookmarkButton
-                      resourceId={res.id}
-                      initialBookmarked={bookmarkedSet.has(res.id)}
-                      size="icon-sm"
-                    />
-                    <ReportResourceButton resourceId={res.id} />
-                    <ResourceDownloadButton
-                      resourceId={res.id}
-                      initialDownloads={res.downloadCount}
-                      fileName={res.fileName}
-                    />
-                  </div>
-                </div>
-              </article>
+                {tab.label}
+              </Link>
             );
-          })
-        )}
-      </section>
-    </main>
+          })}
+        </div>
+
+        {/* Resources Cards Grid */}
+        <section className="space-y-4">
+          {resources.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
+              <div className="rounded-2xl bg-blue-50 dark:bg-blue-950 p-4 text-blue-700 dark:text-blue-300">
+                <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <h3 className="mt-4 text-base font-bold text-foreground">
+                No {selectedType ? RESOURCE_TYPE_META[selectedType]?.label : "materials"} found yet
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground max-w-sm">
+                Upload old exam papers or notes for this subject. Uploads are moderated by the College Admin.
+              </p>
+            </div>
+          ) : (
+            resources.map((res) => {
+              const meta = RESOURCE_TYPE_META[res.type];
+              const isPdf = res.fileName.endsWith(".pdf") || res.mimeType === "application/pdf";
+              const paperUrl = res.fileKey.startsWith("papers/") ? `/${res.fileKey}` : "/papers/PBCOE-Semester-3-Consolidated-Exam-Papers.pdf";
+
+              return (
+                <article
+                  key={res.id}
+                  className="group relative flex flex-col gap-3.5 rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs transition-all hover:border-blue-500/40 hover:shadow-sm"
+                >
+                  {/* Meta Badges Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        {meta.label}
+                      </span>
+
+                      {res.examType && (
+                        <span className="rounded-lg bg-indigo-50 dark:bg-indigo-950 px-2.5 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                          {res.examType}
+                        </span>
+                      )}
+
+                      {res.academicYear && (
+                        <span className="rounded-lg bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                          {res.academicYear}
+                        </span>
+                      )}
+
+                      {res.verifiedBadge && (
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                          PBCOE Verified
+                        </span>
+                      )}
+                    </div>
+
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {formatFileSize(res.fileSize)}
+                    </span>
+                  </div>
+
+                  {/* Title & Description */}
+                  <div className="space-y-1">
+                    <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                      {res.title}
+                    </h3>
+                    {res.description && (
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        {res.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  {res.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {res.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="rounded-md bg-muted/80 px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                        >
+                          #{tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Action Row: Calculated Button Slots */}
+                  <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-border/60 pt-3.5">
+                    <div className="text-xs text-muted-foreground">
+                      Uploader: <span className="font-semibold text-foreground">{res.uploader.name}</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {isPdf && (
+                        <a
+                          href={paperUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/60 px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors shadow-2xs"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>View Question Paper</span>
+                        </a>
+                      )}
+
+                      <BookmarkButton
+                        resourceId={res.id}
+                        initialBookmarked={bookmarkedSet.has(res.id)}
+                        size="icon-sm"
+                      />
+                      <ReportResourceButton resourceId={res.id} />
+                      <ResourceDownloadButton
+                        resourceId={res.id}
+                        initialDownloads={res.downloadCount}
+                        fileName={res.fileName}
+                      />
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </section>
+      </main>
+    </div>
   );
 }

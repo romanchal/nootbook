@@ -4,98 +4,118 @@ import { buttonVariants } from "@/components/ui/button";
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-12 text-center sm:py-16">
-      {/* Top Badge */}
-      <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-6 shadow-2xs">
+      {/* Top Royal Campus Badge */}
+      <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50/80 dark:bg-blue-950/80 px-4 py-1.5 text-xs font-bold text-blue-800 dark:text-blue-200 mb-6 shadow-2xs">
         <span>🏛️</span>
-        <span>PBCOE Autonomous Campus · Nagpur</span>
+        <span>Priyadarshini Bhagwati College of Engineering, Nagpur (AUTONOMOUS)</span>
       </div>
 
       {/* Main Title & Subtitle */}
       <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-foreground max-w-3xl leading-tight">
-        Everything a college student needs in <span className="text-primary">one place</span>.
+        Academic Library & Student Portal for <span className="text-blue-700 dark:text-blue-400">PBCOE</span>.
       </h1>
 
       <p className="mt-4 max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-        Multi-tenant academic library with 3-tap exam paper discovery, paired with a safe
-        peer-to-peer student assistance marketplace backed by double-entry escrow.
+        Autonomous academic archives with verified Term I & Term II question papers, semester syllabus, and peer student task assistance with double-entry escrow.
       </p>
 
-      {/* Primary Actions */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+      {/* Primary Actions with calculated slots */}
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
         <Link
           href="/login"
-          className={buttonVariants({ size: "lg", className: "px-6 font-semibold shadow-xs" })}
+          className={buttonVariants({
+            size: "lg",
+            className: "px-6 py-2.5 rounded-xl font-bold bg-blue-700 hover:bg-blue-800 text-white shadow-xs hover:shadow-md transition-all hover:scale-[1.02]",
+          })}
         >
           ✨ Launch Interactive Login
         </Link>
         <Link
-          href="/dashboard"
-          className={buttonVariants({ variant: "outline", size: "lg", className: "px-6 font-semibold" })}
+          href="/library"
+          className={buttonVariants({
+            variant: "outline",
+            size: "lg",
+            className: "px-6 py-2.5 rounded-xl font-bold border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-700 dark:text-blue-300 transition-all",
+          })}
         >
-          Enter Dashboard →
+          Explore Library Papers →
         </Link>
       </div>
 
-      {/* Features Grid */}
-      <div className="mt-14 grid w-full grid-cols-1 gap-4 text-left sm:grid-cols-3">
+      {/* Features Grid with Royal Blue Accent */}
+      <div className="mt-14 grid w-full grid-cols-1 gap-4.5 text-left sm:grid-cols-3">
         <Link
           href="/library"
-          className="group rounded-xl border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-sm"
+          className="group rounded-2xl border border-border/80 bg-card p-6 transition-all hover:border-blue-500/50 hover:shadow-md hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-2xl">📚</span>
-            <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs font-bold text-blue-700 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
               Explore →
             </span>
           </div>
-          <h3 className="mt-3 text-base font-bold text-foreground">Academic Library</h3>
+          <h3 className="mt-3.5 text-base font-bold text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+            PBCOE Exam Papers
+          </h3>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            Past university question papers, verified practical files, cheat sheets, and notes for Nagpur colleges.
+            Autonomous Term I & Term II question papers, syllabus, and topper notes for Artificial Intelligence (AI).
           </p>
         </Link>
 
         <Link
           href="/tasks"
-          className="group rounded-xl border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-sm"
+          className="group rounded-2xl border border-border/80 bg-card p-6 transition-all hover:border-blue-500/50 hover:shadow-md hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-2xl">💼</span>
-            <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs font-bold text-blue-700 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
               Explore →
             </span>
           </div>
-          <h3 className="mt-3 text-base font-bold text-foreground">Task Marketplace</h3>
+          <h3 className="mt-3.5 text-base font-bold text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+            Peer Task Marketplace
+          </h3>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            Report formatting, LaTeX typing, PPT slide design, and 1-on-1 topic tutoring with held escrow.
+            Report formatting, seminar PPT slide design, and 1-on-1 tutoring requests held securely in escrow.
           </p>
         </Link>
 
         <Link
           href="/wallet"
-          className="group rounded-xl border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-sm"
+          className="group rounded-2xl border border-border/80 bg-card p-6 transition-all hover:border-blue-500/50 hover:shadow-md hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-2xl">🛡️</span>
-            <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs font-bold text-blue-700 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
               Explore →
             </span>
           </div>
-          <h3 className="mt-3 text-base font-bold text-foreground">Wallet & Escrow</h3>
+          <h3 className="mt-3.5 text-base font-bold text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+            Wallet & Double-Entry Escrow
+          </h3>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            Immutable double-entry balanced ledger, earner withdrawal tracking, and dispute mediation.
+            Transparent student paise ledger, verified earner balance withdrawals, and fair dispute settlement.
           </p>
         </Link>
       </div>
 
-      {/* Admin Consoles Shortcut */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground border-t pt-6 w-full max-w-lg">
-        <span className="font-medium text-foreground">Admin Portals:</span>
-        <Link href="/admin/college" className="hover:text-primary transition-colors underline">
-          College Admin Console
+      {/* Admin Consoles Shortcut: Cleanly Separated */}
+      <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground border-t border-border/70 pt-6 w-full max-w-xl">
+        <span className="font-semibold text-foreground">Separate Governance Consoles:</span>
+        <Link
+          href="/admin/college"
+          className="inline-flex items-center gap-1 font-bold text-blue-700 dark:text-blue-400 hover:underline"
+        >
+          <span>🏛️</span>
+          <span>College Admin (PBCOE)</span>
         </Link>
         <span>·</span>
-        <Link href="/admin/super" className="hover:text-primary transition-colors underline">
-          Super Admin Console
+        <Link
+          href="/admin/super"
+          className="inline-flex items-center gap-1 font-bold text-indigo-700 dark:text-indigo-400 hover:underline"
+        >
+          <span>👑</span>
+          <span>Platform Super Admin</span>
         </Link>
       </div>
     </main>

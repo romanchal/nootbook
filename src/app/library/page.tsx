@@ -77,11 +77,11 @@ export default async function LibraryRootPage() {
         </nav>
 
         {/* Dedicated College Section Header */}
-        <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-card via-card to-amber-500/5 p-6 sm:p-8 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-card via-card to-blue-500/5 p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-950 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                   🏛️ {collegeCity} Campus · AUTONOMOUS
                 </span>
                 <span className="text-xs text-muted-foreground">
@@ -99,19 +99,19 @@ export default async function LibraryRootPage() {
             <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0">
               <Link
                 href="/library/search"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-slate-100 transition-colors shadow-2xs"
               >
                 <span>🔍 Search</span>
               </Link>
               <Link
                 href="/library/bookmarks"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-slate-100 transition-colors shadow-2xs"
               >
                 <span>🔖 Saved</span>
               </Link>
               <Link
                 href="/library/upload"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:from-amber-600 hover:to-amber-700 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 px-4 py-2 text-xs font-bold text-white shadow-xs hover:from-blue-800 hover:to-blue-900 transition-all hover:scale-[1.02]"
               >
                 <span>+ Upload</span>
               </Link>
@@ -124,14 +124,14 @@ export default async function LibraryRootPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="flex h-2.5 w-2.5 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
               </span>
               <h2 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
                 Active Branch (Full Curriculum Live)
               </h2>
             </div>
-            <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <span className="rounded-full bg-blue-50 dark:bg-blue-950 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
               Now Available
             </span>
           </div>
@@ -143,19 +143,19 @@ export default async function LibraryRootPage() {
                 <Link
                   key={dept.id}
                   href={`/library/${dept.code.toLowerCase()}`}
-                  className="group relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-card via-card to-emerald-500/10 p-6 sm:p-7 shadow-sm transition-all hover:border-emerald-500 hover:shadow-md hover:-translate-y-0.5"
+                  className="group relative overflow-hidden rounded-3xl border border-blue-500/30 bg-gradient-to-br from-card via-card to-blue-500/10 p-6 sm:p-7 shadow-sm transition-all hover:border-blue-600 hover:shadow-md hover:-translate-y-0.5"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-extrabold rounded-lg bg-emerald-500/15 px-2.5 py-1 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                        <span className="font-mono text-xs font-extrabold rounded-lg bg-blue-700 text-white px-2.5 py-1 shadow-2xs">
                           {dept.code}
                         </span>
-                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
                           ● 8 Semesters Available
                         </span>
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-extrabold text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                         {dept.name}
                       </h3>
                       <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
@@ -167,7 +167,7 @@ export default async function LibraryRootPage() {
                       <span className="font-mono text-xs font-bold text-foreground">
                         {dept._count.subjects} Curriculum Subjects
                       </span>
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-blue-300 group-hover:translate-x-1 transition-transform">
                         <span>Explore Semesters</span>
                         <span>→</span>
                       </span>

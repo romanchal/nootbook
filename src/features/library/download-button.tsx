@@ -25,18 +25,14 @@ export function ResourceDownloadButton({
       if (res?.downloadCount) {
         setDownloads(res.downloadCount);
       }
-      // For pilot demo files, create a mock download blob if real storage isn't wired yet
-      const blob = new Blob([`Nootbook academic resource: ${fileName}`], {
-        type: "application/pdf",
-      });
-      const url = URL.createObjectURL(blob);
+      
+      const fileUrl = res?.fileKey ? `/${res.fileKey}` : "/papers/PBCOE-Semester-3-Consolidated-Exam-Papers.pdf";
       const a = document.createElement("a");
-      a.href = url;
+      a.href = fileUrl;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Download failed:", err);
     } finally {
@@ -50,7 +46,7 @@ export function ResourceDownloadButton({
       disabled={loading}
       size="sm"
       variant="default"
-      className="gap-1.5"
+      className="gap-1.5 bg-blue-700 hover:bg-blue-800 text-white shadow-xs cursor-pointer"
     >
       <svg
         className="h-3.5 w-3.5"

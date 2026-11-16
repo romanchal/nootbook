@@ -30,7 +30,12 @@ export async function downloadResource(resourceId: string) {
   }
 
   const result = await recordResourceDownload(user.collegeId, resourceId);
-  return { success: true, downloadCount: result.downloadCount };
+  return {
+    success: true,
+    downloadCount: result.downloadCount,
+    fileKey: result.fileKey,
+    fileName: result.fileName,
+  };
 }
 
 export async function submitResourceReport(formData: FormData) {
