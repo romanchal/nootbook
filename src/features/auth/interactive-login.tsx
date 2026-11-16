@@ -425,12 +425,12 @@ export function InteractiveNootbookLogin() {
             aria-label="Toggle Sound"
           >
             {soundEnabled ? (
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="16" height="16" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
               </svg>
             ) : (
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="16" height="16" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                 <line x1="23" y1="9" x2="17" y2="15" />
                 <line x1="17" y1="9" x2="23" y2="15" />
@@ -697,7 +697,7 @@ export function InteractiveNootbookLogin() {
               disabled={loading}
               className="flex h-10 w-full items-center justify-center gap-2.5 rounded-xl border border-white/15 bg-white/5 font-semibold text-white transition-all hover:bg-white/10 hover:border-white/25 active:scale-[0.98] disabled:opacity-50 text-xs shadow-sm cursor-pointer"
             >
-              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
+              <svg width="18" height="18" className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
