@@ -294,7 +294,16 @@ export function InteractiveNootbookLogin() {
         },
       });
       if (oauthError) {
-        setError(oauthError.message);
+        if (
+          oauthError.message.includes("provider is not enabled") ||
+          oauthError.message.includes("Unsupported provider")
+        ) {
+          setError(
+            "Google Sign-In is not yet configured in Supabase. Please add your Google Client ID & Secret in Supabase Auth > Providers, or sign in with Email & Password below."
+          );
+        } else {
+          setError(oauthError.message);
+        }
         setLoading(false);
       }
     } catch (err) {
