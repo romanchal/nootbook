@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import { signInWithPassword, signUpWithPassword } from "@/features/auth/actions";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,7 @@ const THEMES: Record<ThemeColor, ColorThemeMeta> = {
 };
 
 export function InteractiveNootbookLogin() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [theme, setTheme] = useState<ThemeColor>("amber");
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -389,54 +390,64 @@ export function InteractiveNootbookLogin() {
       <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-10 h-full w-full" />
 
       {/* Top Quick Controls: Theme Colors & Sound Toggle */}
-      <header className="fixed top-5 right-6 z-50 flex items-center gap-3">
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md">
-          {(Object.keys(THEMES) as ThemeColor[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t)}
-              title={THEMES[t].name}
-              className={`h-4.5 w-4.5 rounded-full transition-all ${
-                theme === t ? "scale-125 ring-2 ring-white" : "opacity-70 hover:opacity-100"
-              }`}
-              style={{ backgroundColor: THEMES[t].dot }}
-              aria-label={THEMES[t].name}
-            />
-          ))}
-        </div>
-
-        <button
-          onClick={() => {
-            setSoundEnabled(!soundEnabled);
-            initAudio();
-          }}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
-          title={soundEnabled ? "Mute Sound" : "Enable Sound"}
-          aria-label="Toggle Sound"
+      <header className="fixed top-5 inset-x-6 z-50 flex items-center justify-between pointer-events-none">
+        <Link
+          href="/"
+          className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white"
         >
-          {soundEnabled ? (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-          ) : (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <line x1="23" y1="9" x2="17" y2="15" />
-              <line x1="17" y1="9" x2="23" y2="15" />
-            </svg>
-          )}
-        </button>
+          <span>←</span>
+          <span>Home</span>
+        </Link>
+
+        <div className="pointer-events-auto flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md">
+            {(Object.keys(THEMES) as ThemeColor[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                title={THEMES[t].name}
+                className={`h-4.5 w-4.5 rounded-full transition-all cursor-pointer ${
+                  theme === t ? "scale-125 ring-2 ring-white" : "opacity-70 hover:opacity-100"
+                }`}
+                style={{ backgroundColor: THEMES[t].dot }}
+                aria-label={THEMES[t].name}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={() => {
+              setSoundEnabled(!soundEnabled);
+              initAudio();
+            }}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white cursor-pointer"
+            title={soundEnabled ? "Mute Sound" : "Enable Sound"}
+            aria-label="Toggle Sound"
+          >
+            {soundEnabled ? (
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* Main Interactive Stage */}
-      <main className="relative z-20 flex w-full max-w-5xl flex-col items-center justify-center gap-8 md:flex-row md:gap-12">
+      <main className="relative z-20 flex w-full max-w-5xl flex-col items-center justify-center gap-6 md:flex-row md:gap-10 pt-16 md:pt-0">
         {/* ============================================================== */}
         {/* High-Quality Nootbook Vector Artwork Stage                     */}
         {/* ============================================================== */}
-        <div className="relative flex w-[360px] sm:w-[420px] shrink-0 items-center justify-center">
+        <div className="relative flex flex-col items-center justify-center shrink-0 w-[280px] sm:w-[340px] md:w-[380px]">
           <svg
-            className="h-[480px] w-full overflow-visible drop-shadow-2xl transition-all duration-500"
+            className="h-[340px] sm:h-[420px] w-full overflow-visible drop-shadow-2xl transition-all duration-500"
             viewBox="0 0 420 520"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -647,29 +658,25 @@ export function InteractiveNootbookLogin() {
             </g>
           </svg>
 
-          {/* Floating Guidance Tooltip */}
-          <div
-            className={`pointer-events-none absolute top-[415px] left-[130px] rounded-full border border-white/15 bg-black/80 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xl backdrop-blur-md transition-all duration-300 ${
-              isOpen ? "opacity-0 translate-y-2" : "opacity-100 animate-bounce"
-            }`}
+          {/* Interactive Toggle Hint Button */}
+          <button
+            type="button"
+            onClick={toggleNootbook}
+            className="mt-3 text-xs font-semibold text-white/70 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-3.5 py-1.5 backdrop-blur-md"
           >
-            Pull bookmark to open Nootbook
-          </div>
+            <span>{isOpen ? "📖 Click to close cover" : "✨ Click or pull ribbon to open"}</span>
+          </button>
         </div>
 
         {/* ============================================================== */}
         {/* Real Working Next.js / Supabase Login Card                     */}
         {/* ============================================================== */}
         <div
-          className={`w-full max-w-sm rounded-3xl border border-white/10 bg-[#12161c]/80 p-7 shadow-2xl backdrop-blur-2xl transition-all duration-500 ${
-            isOpen
-              ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-              : "opacity-0 translate-y-4 scale-95 pointer-events-none hidden md:flex md:opacity-20"
-          }`}
+          className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#12161c]/90 p-6 sm:p-7 shadow-2xl backdrop-blur-2xl transition-all duration-500 opacity-100 translate-y-0 scale-100 pointer-events-auto"
           style={{
             boxShadow: isOpen
               ? `-20px 0 60px -15px ${currentMeta.beamMid}, 0 25px 60px rgba(0, 0, 0, 0.6)`
-              : undefined,
+              : "0 25px 60px rgba(0, 0, 0, 0.6)",
           }}
         >
           <div className="w-full space-y-4">
