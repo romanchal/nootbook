@@ -6,8 +6,8 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-12 text-center sm:py-16">
       {/* Top Badge */}
       <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-6 shadow-2xs">
-        <span>🚀</span>
-        <span>Pilot Live · Nagpur, India</span>
+        <span>🏛️</span>
+        <span>PBCOE Autonomous Campus · Nagpur</span>
       </div>
 
       {/* Main Title & Subtitle */}

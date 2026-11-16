@@ -55,6 +55,33 @@ export async function ensureUserRecord(input: EnsureUserInput) {
       });
     }
 
+    // Auto-grant administrative roles to project owner / admin emails
+    const emailLower = email.toLowerCase();
+    const isAdminEmail =
+      emailLower === "romanchalbopche@gmail.com" ||
+      emailLower.startsWith("admin@") ||
+      (process.env.ADMIN_EMAILS?.toLowerCase().split(",").map((e) => e.trim()).includes(emailLower) ?? false);
+
+    if (isAdminEmail) {
+      const hasSuper = await tx.role.findFirst({
+        where: { userId: authUserId, name: "SUPER_ADMIN" },
+      });
+      if (!hasSuper) {
+        await tx.role.create({
+          data: { userId: authUserId, name: "SUPER_ADMIN" },
+        });
+      }
+
+      const hasCollegeAdmin = await tx.role.findFirst({
+        where: { userId: authUserId, name: "COLLEGE_ADMIN", collegeId },
+      });
+      if (!hasCollegeAdmin) {
+        await tx.role.create({
+          data: { userId: authUserId, name: "COLLEGE_ADMIN", collegeId },
+        });
+      }
+    }
+
     await tx.wallet.upsert({
       where: { userId: authUserId },
       create: { userId: authUserId, collegeId },
@@ -75,7 +102,34 @@ export async function provisionOnFirstSignIn() {
   if (!authUser) return null;
 
   const existing = await db.user.findUnique({ where: { id: authUser.id } });
-  if (existing) return existing;
+  if (existing) {
+    // Ensure admin roles for project owner on every sign-in
+    const emailLower = (authUser.email ?? "").toLowerCase();
+    if (
+      emailLower === "romanchalbopche@gmail.com" ||
+      emailLower.startsWith("admin@")
+    ) {
+      const superRole = await db.role.findFirst({
+        where: { userId: existing.id, name: "SUPER_ADMIN" },
+      });
+      if (!superRole) {
+        await db.role.create({
+          data: { userId: existing.id, name: "SUPER_ADMIN" },
+        });
+      }
+      if (existing.collegeId) {
+        const collegeAdminRole = await db.role.findFirst({
+          where: { userId: existing.id, name: "COLLEGE_ADMIN", collegeId: existing.collegeId },
+        });
+        if (!collegeAdminRole) {
+          await db.role.create({
+            data: { userId: existing.id, name: "COLLEGE_ADMIN", collegeId: existing.collegeId },
+          });
+        }
+      }
+    }
+    return existing;
+  }
 
   const college = await db.college.findFirst({
     where: { active: true },

@@ -22,12 +22,14 @@ async function getConnectionString(): Promise<string> {
 }
 
 const DEPARTMENTS = [
-  { name: "Computer", code: "COMP" },
-  { name: "Information Technology", code: "IT" },
-  { name: "Mechanical", code: "MECH" },
-  { name: "Civil", code: "CIVIL" },
-  { name: "Electrical", code: "ELEC" },
-  { name: "Electronics and Telecommunication", code: "ENTC" },
+  { name: "Artificial Intelligence (AI)", code: "AI", active: true },
+  { name: "Computer Science and Engineering", code: "CSE", active: false },
+  { name: "Civil Engineering", code: "CIVIL", active: false },
+  { name: "Information Technology", code: "IT", active: false },
+  { name: "Electrical Engineering", code: "EE", active: false },
+  { name: "Electronics and Communication Engineering", code: "ECE", active: false },
+  { name: "Electronics and Telecommunication Engineering", code: "ETC", active: false },
+  { name: "Mechanical Engineering", code: "MECH", active: false },
 ];
 
 const SEMESTERS = [
@@ -91,9 +93,15 @@ async function main() {
 
   try {
     const college = await prisma.college.upsert({
-      where: { slug: "pilot" },
-      create: { name: "Pilot College", slug: "pilot", city: "Nagpur" },
-      update: {},
+      where: { slug: "pbcoe" },
+      create: {
+        name: "Priyadarshini Bhagwati College of Engineering, Nagpur (AUTONOMOUS)",
+        slug: "pbcoe",
+        city: "Nagpur",
+      },
+      update: {
+        name: "Priyadarshini Bhagwati College of Engineering, Nagpur (AUTONOMOUS)",
+      },
     });
 
     // Seed pilot admin user for uploader/approver associations
@@ -123,8 +131,8 @@ async function main() {
     for (const deptData of DEPARTMENTS) {
       const dept = await prisma.department.upsert({
         where: { collegeId_code: { collegeId: college.id, code: deptData.code } },
-        create: { collegeId: college.id, name: deptData.name, code: deptData.code },
-        update: {},
+        create: { collegeId: college.id, name: deptData.name, code: deptData.code, active: deptData.active },
+        update: { name: deptData.name, active: deptData.active },
       });
 
       // Seed standard classes (Year 1-4, Sem 1-8)
