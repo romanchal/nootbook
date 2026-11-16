@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRs, paiseToRupees, rupeesToPaise } from "./money";
+import { formatPaiseToRupees, formatRs, paiseToRupees, rupeesToPaise } from "./money";
 
 describe("money helpers", () => {
   it("converts rupees to integer paise without floating-point drift", () => {
@@ -16,5 +16,10 @@ describe("money helpers", () => {
   it("formats paise as Indian rupees with two decimals", () => {
     expect(formatRs(50000)).toBe("Rs. 500.00");
     expect(formatRs(1999)).toBe("Rs. 19.99");
+  });
+
+  it("formats paise as compact rupee symbol text", () => {
+    expect(formatPaiseToRupees(50000)).toBe("₹500");
+    expect(formatPaiseToRupees(25000)).toBe("₹250");
   });
 });

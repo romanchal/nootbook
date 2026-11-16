@@ -1,6 +1,6 @@
 # Nootbook — architecture note
 
-> Status: Step 1 (Foundation). Kept short; grows as the build proceeds.
+> Status: Steps 1 through 9 (Disputes, Escrow Settlements, & Safety Engine) complete. Kept short; grows as the build proceeds.
 
 ## 1. What Nootbook is
 
@@ -31,8 +31,9 @@ src/
   lib/            # shared logic: db, env, money
   features/
     library/      # academic library (Steps 3–5)
-    tasks/        # marketplace (Steps 7–9)
+    tasks/        # marketplace (Steps 7–8)
     wallet/       # wallet/ledger (Step 8)
+    disputes/     # dispute mediation, escrow settlement & safety (Step 9)
     admin/        # admin console (Step 6)
   generated/      # Prisma client (git-ignored)
 prisma/

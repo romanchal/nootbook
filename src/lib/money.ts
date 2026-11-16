@@ -26,3 +26,8 @@ export function formatRs(paise: number): string {
     maximumFractionDigits: 2,
   })}`;
 }
+
+/** Format integer paise with Rupee symbol, e.g. formatPaiseToRupees(50000) -> "₹500". */
+export function formatPaiseToRupees(paise: number): string {
+  return `₹${Math.round(paise / PAISE_PER_RUPEE).toLocaleString("en-IN")}`;
+}

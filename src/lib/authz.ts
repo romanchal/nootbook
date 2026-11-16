@@ -77,3 +77,38 @@ export function hasRoleAtLeast(roles: ScopedRole[], name: RoleName): boolean {
   const required = ADMIN_TIER[name];
   return roles.some((r) => ADMIN_TIER[r.name] >= required);
 }
+
+/** True when the user has earner access for a college (or is SUPER_ADMIN). */
+export function hasEarnerAccess(roles: ScopedRole[], collegeId?: string): boolean {
+  if (isSuperAdmin(roles)) return true;
+  return roles.some(
+    (r) => r.name === "EARNER" && (!collegeId || r.collegeId === collegeId),
+  );
+}
+
+/** True when the user is a class admin for the specified college (and class if given). */
+export function hasClassAdminAccess(
+  roles: ScopedRole[],
+  collegeId: string,
+  classId?: string,
+): boolean {
+  if (isSuperAdmin(roles)) return true;
+  return roles.some(
+    (r) =>
+      r.name === "CLASS_ADMIN" &&
+      r.collegeId === collegeId &&
+      (!classId || r.classId === classId),
+  );
+}
+
+/** True when the user is a college admin for the specified college. */
+export function hasCollegeAdminAccess(
+  roles: ScopedRole[],
+  collegeId: string,
+): boolean {
+  if (isSuperAdmin(roles)) return true;
+  return roles.some(
+    (r) => r.name === "COLLEGE_ADMIN" && r.collegeId === collegeId,
+  );
+}
+

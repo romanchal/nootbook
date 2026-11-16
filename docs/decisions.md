@@ -86,6 +86,118 @@ migrations only; the app runtime (pg adapter) connects via the hostname.
 `"id" = auth.uid()::text`. Functionally identical for the app; a native `uuid`
 column can be adopted later for index/type benefits.
 
+## 2026-11-07 — Step 2: Role route protection via server guards
+
+**Decision.** Implement role-specific boundaries (`requireEarnerGuard`,
+`requireClassAdminGuard`, `requireCollegeAdminGuard`, `requireSuperAdminGuard`)
+in `src/features/auth/guards.ts` with automated redirect to `/unauthorized`.
+
+**Why.** Fulfills Step 2 acceptance criteria that each role can only reach its
+designated screens and data. Super Admins retain cross-college privileges.
+
+## 2026-11-07 — Step 3: Fixed 5-Level Academic Library Tree (3-Tap Mobile Flow)
+
+**Decision.** Structure the academic repository into the fixed 5-level hierarchy
+mandated by Section 4:
+`College (Tenant) -> Department -> Year/Class -> Subject -> Resource Hub`.
+
+**Why.** Enables the core requirement where any student can reach their target
+paper within three taps (`/library` → `/[deptCode]` → `/sem/[sem]` → `/subject/[id]`).
+Only `APPROVED` resources are ever returned to students. Unapproved files remain
+in the Class Admin moderation queue.
+
+## 2026-11-07 — Offline and 4G Optimization: System Font Stacks
+
+**Decision.** Rely on system sans-serif font fallbacks in `src/app/layout.tsx`
+rather than blocking external Google Fonts HTTP requests at build time.
+
+**Why.** Aligns with Section 17.7 requirement for fast first-paint on mid-range
+Android phones on mobile data in Nagpur, eliminating external network dependencies.
+
+## 2026-11-07 — Step 4: Quality Control & Class Admin Approval Pipeline
+
+**Decision.** Every resource upload starts in `PENDING` status. Unapproved files
+are strictly filtered out from student queries (`status: "APPROVED"` only). Class
+Admins review submissions in their moderation queue; approval assigns `verifiedBadge: true`
+and publishes the file, while rejection records the reason. Every action writes to
+the immutable `AuditLog`.
+
+**Why.** Fulfills Section 4 and Section 18 Step 4 acceptance criteria to safeguard
+academic integrity and ensure only verified study material is published to students.
+
+
+
+## 2026-11-07 — Step 5: Search, Bookmarks, and Download Tracking
+ 
+**Decision.** Built multi-attribute academic search (`/library/search`) with sub-second execution (<1000ms),
+instant debounce/URL synchronization, multi-tenant college isolation (`collegeId`), and multi-attribute
+filtering (department, semester, resource type, verified status). Integrated user bookmarks (`/library/bookmarks`)
+with optimistic toggling (`BookmarkButton`) and server validation preventing cross-tenant access. Download tracking
+increments the immutable count on each request.
+
+**Why.** Satisfies Section 18 Step 5 acceptance criteria ("Full-text search with filters, bookmarks and download tracking.
+Accepted when search returns results in under one second on pilot data"). Ensures students can bookmark resources for
+offline/quick exam access and discover papers across departments.
+
+## 2026-11-07 — Step 6: Admin Console, Content Moderation, and Audit Logging
+
+**Decision.** Implemented comprehensive administration consoles across roles (`/admin/super`, `/admin/college`, `/admin/class`):
+- Centralized immutable audit logging (`AuditLog`): Every administrative mutation (resource approval/rejection, report resolution, content takedown, role assignment/revocation, user suspension, college status change, and financial commission adjustments) writes a tamper-evident record.
+- Content & Report Moderation: Student report resolution with optional automated resource takedown (marking status `REJECTED`).
+- Dynamic Commission Configuration: Stored in `commission_configs` table (defaults: 1000 bps / 10% earner fee, 2000 paise / Rs. 20 payer fee) with live financial simulator.
+- College Tenant Lifecycle: Super Admin onboarding of new colleges with standard department provisioning.
+
+**Why.** Satisfies Section 18 Step 6 acceptance criteria ("User, content and report management with audit logs. Accepted when every admin action is logged"). Enforces strict multi-tenancy where College and Class Admins only see and manage their college's data.
+
+## 2026-11-14 — Step 7: Peer-to-Peer Task Marketplace Lifecycle
+
+**Decision.** Implemented peer-to-peer task marketplace (`/tasks`, `/tasks/new`, `/tasks/[taskId]`, `/tasks/my`, `/earner`):
+- Academic Integrity Enforcement (Section 6 & 17.8): Whitelist of allowed categories (`FORMATTING`, `TYPING`, `SLIDE_DESIGN`, `DIAGRAM`, `PROOFREADING`, `TUTORING`, `DOUBT_SOLVING`, `PROJECT_GUIDANCE`). Programmatic blocking of exam cheating, proxy attendance, and test impersonation patterns.
+- Verified Earner Boundary: Only verified campus earners (`EARNER` role) can submit bid proposals. Bidding on own tasks is prohibited.
+- Full 8-Step Lifecycle with Audit Logging:
+  1. `TASK_CREATE` (status `OPEN`)
+  2. `BID_SUBMIT` (status `PENDING`)
+  3. `BID_WITHDRAW` (status `WITHDRAWN`)
+  4. `TASK_ASSIGN` (status `ASSIGNED`, accepts winning bid, rejects competing bids)
+  5. `TASK_DELIVER` (status `DELIVERED`, records delivery notes/links)
+  6. `TASK_ACCEPT` (status `ACCEPTED`, concludes work delivery)
+  7. `TASK_REVIEW` (1–5 star rating and feedback stored in `reviews`)
+  8. `TASK_CANCEL` (allowed only while `OPEN`, status `CANCELLED`)
+
+**Why.** Satisfies Section 18 Step 7 acceptance criteria ("Task posting, earner approval, bidding, delivery and reviews. Accepted when a full task can be completed without payment errors"). Establishes the lifecycle foundations prior to Step 8 (escrow holds and double-entry ledger settlement).
+
+## 2026-11-14 — Step 8: Double-Entry Ledger, Wallet, and Manual Escrow Settlement
+
+**Decision.** Configured payments and escrow in **Manual / Pilot Mode** (`/wallet`, `src/features/wallet`):
+- Double-Entry Balanced Ledger Engine: Every monetary movement writes immutable legs to `LedgerEntry` where debits and credits sum exactly to zero. Entries are never updated or deleted.
+- Manual Escrow Deposit: Students accept proposals and fund escrow in manual simulation mode, creating `EscrowHold` (`status: HELD`) and debiting payer / crediting `ESCROW_HELD`.
+- Escrow Release on Delivery Acceptance: When student accepts work, escrow is released, recording exact 3-leg distribution:
+  - Debit `ESCROW_HELD` (e.g. ₹520)
+  - Credit Earner `USER_BALANCE` (e.g. ₹450)
+  - Credit `PLATFORM_REVENUE` (e.g. ₹70 = ₹50 commission + ₹20 fee)
+  - Total Debits (₹520) == Total Credits (₹520). Discrepancy is 0.
+- Earner Payouts with RBI Compliance: Earner withdrawals enforce KYC verification guard (`user.kycVerified`), debiting `USER_BALANCE` and crediting `PAYOUTS_PENDING` until settled.
+
+**Why.** Satisfies Section 18 Step 8 acceptance criteria ("The ledger always balances and repeated webhooks cause no double payment") while accommodating user guidance to operate in manual/pilot mode during development.
+
+## 2026-11-14 — Step 9: Disputes, Escrow Settlements, and Three-Strike Safety
+
+**Decision.** Built the comprehensive Dispute Mediation, Ledger Settlement, and Safety system (`src/features/disputes`):
+- Dispute Opening: Students or assigned earners can open a formal dispute on active (`ASSIGNED` or `DELIVERED`) tasks. Halts escrow release and updates task status to `DISPUTED`.
+- Dispute Resolution by Admins (College Admin for their college, Super Admin platform-wide):
+  1. `REFUND_STUDENT`: Full escrow hold refunded to student via balanced double-entry ledger movement (Debit `ESCROW_HELD`, Credit `USER_BALANCE` for student), updating escrow to `REFUNDED` and task to `REFUNDED`.
+  2. `RELEASE_EARNER`: Deliverable verified and upheld. Escrow released to earner minus standard platform commission via balanced 3-leg distribution, updating escrow to `RELEASED` and task to `ACCEPTED`.
+  3. `SPLIT`: Custom partial settlement between student and earner with strictly balanced debit/credit sums.
+- Three-Strike Conduct & Safety Escalation:
+  - Strikes recorded in immutable `AuditLog` (`action: "USER_STRIKE"`).
+  - Strike 1 & 2: Official warnings with reason.
+  - Strike 3: Triggers automated suspension (`User.status = "SUSPENDED"`) and wallet freeze (`Wallet.status = "FROZEN"`).
+  - Administrative reinstatement unfreezes wallet and reactivates account (`action: "USER_REINSTATE"`).
+- Academic Integrity & Category Whitelist: Programmatic enforcement of allowed assistance types (`FORMATTING`, `TYPING`, `SLIDE_DESIGN`, `DIAGRAM`, `PROOFREADING`, `TUTORING`, `DOUBT_SOLVING`, `PROJECT_GUIDANCE`) with rejection of exam cheating, proxy attendance, or test impersonation.
+- Admin Integration: Dedicated "Disputes & Escrow" tab in College Admin Console (`/admin/college`) and Super Admin Console (`/admin/super`), with dispute banner and mediation request dialog on `/tasks/[taskId]`.
+
+**Why.** Satisfies Section 18 Step 9 acceptance criteria ("Dispute flow, refunds, strikes and category whitelist. Accepted when an admin can resolve a dispute end to end").
+
 ## Open items (to confirm with the team / professionals)
 
 - Final commission and fixed-fee numbers (the document's Rs. 500 / 10% / Rs. 20

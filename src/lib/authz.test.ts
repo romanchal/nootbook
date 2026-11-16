@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   AuthorizationError,
   canAccessCollege,
+  hasClassAdminAccess,
+  hasCollegeAdminAccess,
+  hasEarnerAccess,
   hasRole,
   hasRoleAtLeast,
   hasRoleInCollege,
@@ -55,5 +58,27 @@ describe("authorization helpers", () => {
     expect(hasRoleAtLeast([student], "CLASS_ADMIN")).toBe(false);
     expect(hasRoleAtLeast([classAdmin], "CLASS_ADMIN")).toBe(true);
     expect(hasRoleAtLeast([superAdmin], "COLLEGE_ADMIN")).toBe(true);
+  });
+
+  it("checks role access for earner, class admin, and college admin", () => {
+    expect(hasEarnerAccess([earner], "c1")).toBe(true);
+    expect(hasEarnerAccess([student], "c1")).toBe(false);
+    expect(hasEarnerAccess([superAdmin], "c1")).toBe(true);
+
+    expect(hasClassAdminAccess([classAdmin], "c1", "k1")).toBe(true);
+    expect(hasClassAdminAccess([classAdmin], "c1", "other-class")).toBe(false);
+    expect(hasClassAdminAccess([classAdmin], "c2", "k1")).toBe(false);
+    expect(hasClassAdminAccess([student], "c1", "k1")).toBe(false);
+    expect(hasClassAdminAccess([superAdmin], "c1", "k1")).toBe(true);
+
+    const collegeAdmin: ScopedRole = {
+      name: "COLLEGE_ADMIN",
+      collegeId: "c1",
+      departmentId: null,
+      classId: null,
+    };
+    expect(hasCollegeAdminAccess([collegeAdmin], "c1")).toBe(true);
+    expect(hasCollegeAdminAccess([collegeAdmin], "c2")).toBe(false);
+    expect(hasCollegeAdminAccess([superAdmin], "c2")).toBe(true);
   });
 });
