@@ -19,6 +19,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip Next internals and static assets so they don't trigger auth refresh.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf)$).*)",
   ],
 };

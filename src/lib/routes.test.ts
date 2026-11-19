@@ -11,6 +11,7 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/signup")).toBe(true);
     expect(isPublicPath("/auth/confirm")).toBe(true);
     expect(isPublicPath("/unauthorized")).toBe(true);
+    expect(isPublicPath("/papers/test.pdf")).toBe(true);
   });
 
   it("protects app pages", () => {

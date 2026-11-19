@@ -3,7 +3,7 @@
  * Pure so it can be unit-tested.
  */
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/unauthorized"];
+const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/unauthorized", "/papers"];
 
 /** True for pages reachable without signing in. */
 export function isPublicPath(pathname: string): boolean {
